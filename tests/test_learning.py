@@ -99,3 +99,16 @@ def test_streamlit_filter_same_table():
     assert app.metric[0].value=='2400' and app.metric[1].value=='2'
     app.selectbox[0].select('email').run()
     assert app.metric[0].value=='0' and app.metric[1].value=='1'
+
+def test_invalid_exposure_flag_rejected(tmp_path):
+    df=pd.read_csv(ROOT/'experiments/assignments.csv',dtype='string')
+    df.loc[0,'exposed']='maybe'
+    path=tmp_path/'bad-exposure.csv';df.to_csv(path,index=False)
+    with pytest.raises(ValueError,match='exposure'):experiment(path)
+
+def test_funnel_invalid_unit_time_and_window_rejected():
+    df=pd.DataFrame([['A','view','2026-01-01T00:00:00Z']],columns=['user_id','event_type','event_at'])
+    with pytest.raises(ValueError,match='timezone'):funnel(df,'2026-01-10')
+    with pytest.raises(ValueError,match='positive'):funnel(df,'2026-01-10T00:00:00Z',0)
+    df.loc[0,'user_id']=None
+    with pytest.raises(ValueError,match='Missing'):funnel(df,'2026-01-10T00:00:00Z')

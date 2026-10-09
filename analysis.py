@@ -82,6 +82,7 @@ def experiment(path=None,as_of='2026-01-10T00:00:00Z'):
     df=pd.read_csv(path or ROOT/'experiments/assignments.csv',dtype='string')
     if df.user_id.isna().any() or df.user_id.duplicated().any():raise ValueError('User assigned more than once or missing')
     if not df.variant.isin(['A','B']).all():raise ValueError('Unknown variant')
+    if df.exposed.isna().any() or not df.exposed.isin(['0','1']).all():raise ValueError('Invalid exposure flag')
     assigned=pd.to_datetime(df.assigned_at,utc=True,errors='raise')
     if assigned.isna().any():raise ValueError('Missing assignment time')
     cut=pd.Timestamp(as_of)
@@ -100,8 +101,12 @@ def experiment(path=None,as_of='2026-01-10T00:00:00Z'):
     srm=chisquare(counts,f_exp=[sum(counts)/2]*2)
     return {'nA':na,'nB':nb,'xA':wins[0],'xB':wins[1],'pA':pa,'pB':pb,'difference':d,'ci_low':d-1.96*se,'ci_high':d+1.96*se,'p_two_sided':float(2*norm.sf(abs(d/se0))),'srm_stat':float(srm.statistic),'srm_p':float(srm.pvalue),'exposedA':int((df.loc[df.variant=='A','exposed']=='1').sum()),'exposedB':int((df.loc[df.variant=='B','exposed']=='1').sum()),'as_of':as_of,'synthetic':True,'method':'Independent binary units, approximate normal 95% CI, pooled two-sided z test; assignment ITT'}
 def funnel(df,as_of,days=7):
+    if not isinstance(days,int) or days<=0:raise ValueError('Window must be positive integer days')
+    if df.user_id.isna().any() or df.event_at.isna().any():raise ValueError('Missing funnel user/time')
+    if not df.event_type.isin(['view','buy']).all():raise ValueError('Unknown funnel event type')
     df=df.copy();df.event_at=pd.to_datetime(df.event_at,utc=True)
     cut=pd.Timestamp(as_of)
+    if cut.tzinfo is None:raise ValueError('as_of must have timezone')
     df=df.loc[df.event_at<cut].copy()
     start=df.loc[df.event_type=='view'].groupby('user_id').event_at.min()
     eligible=start.loc[start+pd.Timedelta(days=days)<=cut]
