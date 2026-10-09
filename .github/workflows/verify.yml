@@ -1,0 +1,19 @@
+name: Verify learning kit
+on: [push, workflow_dispatch]
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - run: python lab.py doctor
+      - run: python -m pytest -q
+      - run: python lab.py acceptance
+      - run: python verify_notebooks.py

@@ -1,0 +1,1 @@
+WITH r AS (SELECT customer_id,order_id,amount_cents,ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY created_at DESC,order_id DESC) AS rn FROM orders WHERE amount_cents IS NOT NULL) SELECT customer_id,order_id,amount_cents FROM r WHERE rn=1;

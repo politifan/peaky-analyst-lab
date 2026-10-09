@@ -1,0 +1,12 @@
+CREATE TABLE orders(order_id INT PRIMARY KEY, customer_id INT, amount_cents INT, currency VARCHAR(3), status VARCHAR(16), created_at VARCHAR(25));
+INSERT INTO orders VALUES (1,1,1000,'RUB','paid','2026-01-01T10:00:00Z'),(2,1,2000,'RUB','paid','2026-01-02T10:00:00Z'),(3,2,0,'RUB','paid','2026-01-02T12:00:00Z'),(4,3,500,'USD','paid','2026-01-03T10:00:00Z'),(5,2,700,'RUB','cancelled','2026-01-03T11:00:00Z'),(6,4,NULL,'RUB','paid','2026-01-04T10:00:00Z');
+CREATE TABLE customers(customer_id INT PRIMARY KEY, channel VARCHAR(20));
+INSERT INTO customers VALUES (1,'search'),(2,'email'),(3,'search'),(4,NULL),(5,'social');
+CREATE TABLE refunds(refund_id INT PRIMARY KEY, order_id INT, amount_cents INT);
+INSERT INTO refunds VALUES (1,1,100),(2,1,200),(3,2,300);
+CREATE TABLE events(event_id INT PRIMARY KEY, user_id INT, event_type VARCHAR(20), event_at VARCHAR(25), loaded_at VARCHAR(25));
+INSERT INTO events VALUES (1,1,'view','2026-01-01T10:00:00Z','2026-01-01T10:00:01Z'),(2,1,'buy','2026-01-01T11:00:00Z','2026-01-01T11:00:01Z'),(3,2,'buy','2026-01-02T10:00:00Z','2026-01-02T10:00:01Z'),(4,2,'view','2026-01-02T11:00:00Z','2026-01-02T11:00:01Z'),(5,3,'view','2026-01-02T12:00:00Z','2026-01-04T12:00:00Z'),(6,1,'view','2026-01-03T10:00:00Z','2026-01-03T10:00:01Z');
+CREATE TABLE prices(price_id INT PRIMARY KEY, sku VARCHAR(10), valid_from VARCHAR(25), valid_to VARCHAR(25), price_cents INT);
+INSERT INTO prices VALUES (1,'A','2026-01-01T00:00:00Z','2026-01-03T00:00:00Z',100),(2,'A','2026-01-03T00:00:00Z',NULL,120),(3,'B','2026-01-01T00:00:00Z',NULL,80);
+CREATE TABLE items(item_id INT PRIMARY KEY, order_id INT, sku VARCHAR(10), qty INT, bought_at VARCHAR(25));
+INSERT INTO items VALUES (1,1,'A',2,'2026-01-02T10:00:00Z'),(2,2,'A',1,'2026-01-03T00:00:00Z'),(3,2,'B',3,'2026-01-03T01:00:00Z');
